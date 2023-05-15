@@ -1,0 +1,51 @@
+import io.qameta.allure.Epic;
+import io.restassured.http.ContentType;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import static io.restassured.RestAssured.given;
+
+@Epic ("meore qvizi")
+public class second_quiz {
+    String url="https://bookstore.toolsqa.com/Account/v1/User";
+
+
+//  Empty username and password
+    @Test
+    public void step1(){
+        int statusCode=
+                given().contentType(ContentType.JSON).body("{\n" +
+                                "  \"userName\": \"\",\n" +
+                                "  \"password\": \"\"\n" +
+                                "}")
+                        .when().post(url).getStatusCode();
+        Assert.assertEquals(statusCode,400);
+        System.out.println(statusCode);
+    }
+
+//  Correct username, Wrong password
+    @Test
+    public void step2(){
+        String message =  given().contentType(ContentType.JSON).body("{\n" +
+                        "  \"userName\": \"zura\",\n" +
+                        "  \"password\": \"password\"\n" +
+                        "}")
+                .when().post(url).then().
+                log().all()
+                .extract()
+                .jsonPath().getString("message");
+        Assert.assertEquals(message,"Passwords must have at least one non alphanumeric character, one digit ('0'-'9'), one uppercase ('A'-'Z'), one lowercase ('a'-'z'), one special character and Password must be eight characters or longer.");
+    }
+
+//  Correct username and correct password
+    @Test
+    public void step3(){
+        int responseCode =  given().contentType(ContentType.JSON).body("{\n" +
+                        "  \"userName\": \"zura"+"\",\n" +
+                        "  \"password\": \"Zura1980!"+"\"\n" +
+                        "}")
+                .when().post(url).getStatusCode();
+
+        Assert.assertEquals(responseCode,201);
+    }
+
+}
